@@ -4,7 +4,6 @@
 
 > AI agents need a passport, an immune system, and a security badge that only opens the doors they need.
 
-Built on top of [Capgent](https://github.com/piyushdhoka/Capgent) by Piyush Dhoka (Layer 1). Layers 2 and 3 and the local mode are new.
 
 | Layer | What it does | Where |
 |---|---|---|
