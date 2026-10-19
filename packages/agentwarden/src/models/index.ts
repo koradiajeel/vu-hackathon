@@ -5,6 +5,7 @@ import type { CatalogTable } from "../shared/types";
  * The AI model that powers an agent. The agent uses it for two jobs:
  *  1. read the identity puzzle's wording and turn it into exact byte steps
  *  2. turn a person's plain-English question into one SQL query
+ *  3. (optional) turn the rows that came back into a short plain-English answer
  * The gateway never trusts the model: everything it produces is checked.
  */
 export interface AgentModel {
@@ -14,7 +15,12 @@ export interface AgentModel {
   label: string;
   parsePuzzle(instructions: string[]): Promise<PuzzleStep[]>;
   writeSql(question: string, catalog: CatalogTable[]): Promise<string>;
+  answer?(question: string, columns: string[], rows: Record<string, unknown>[]): Promise<string>;
 }
+
+const ANSWER_PROMPT = `You answer a company employee's question using ONLY the query result you are given.
+Reply in one or two short plain-English sentences. Mention the key numbers (amounts are INR; format large ones readably, e.g. 98 lakh or 9.8 million).
+If the result is empty, say that no matching data was found. Do not mention SQL, tables or columns.`;
 
 const PUZZLE_PROMPT = `You convert puzzle instructions into JSON.
 Each numbered instruction (except the last one, which only says to hash) is one step:
@@ -66,6 +72,11 @@ function chatModel(provider: string, label: string, chat: (system: string, user:
     },
     async writeSql(question, catalog) {
       return extractSql(await chat(sqlPrompt(catalog), question, false));
+    },
+    async answer(question, columns, rows) {
+      const data = JSON.stringify({ columns, rows: rows.slice(0, 50), total_rows: rows.length });
+      return (await chat(ANSWER_PROMPT, `Question: ${question}
+Query result: ${data}`, false)).trim();
     },
   };
 }

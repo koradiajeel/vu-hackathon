@@ -51,6 +51,7 @@ type QueryResult = {
   row_count?: number
   trace: TraceStep[]
   agent_trace: TraceStep[]
+  answer?: string
 }
 type AuditEntry = { id: string; ts: string; agent_id: string; event: string; decision: string; stopped_at?: string; reason: string; question?: string }
 type DemoState = {
@@ -456,6 +457,27 @@ export function GatewayClient() {
                 result={result}
                 question={asked}
                 runId={runId}
+                resultSlot={
+                  result?.decision === "allowed" && result.columns && result.rows ? (
+                    <div className="space-y-3">
+                      {result.answer && (
+                        <div className="rounded-lg bg-ok/10 p-3">
+                          <div className="text-xs font-semibold uppercase tracking-wide text-ok">{agent?.name ?? "The agent"}&apos;s answer</div>
+                          <p className="mt-1 text-base">{result.answer}</p>
+                        </div>
+                      )}
+                      {result.rows.length ? (
+                        <ResultTable columns={result.columns} rows={result.rows} />
+                      ) : (
+                        <p className="text-sm text-muted-foreground">The query ran but found no matching rows.</p>
+                      )}
+                      <details className="text-xs text-muted-foreground">
+                        <summary className="cursor-pointer">SQL that actually ran</summary>
+                        <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono">{result.sql_executed}</pre>
+                      </details>
+                    </div>
+                  ) : null
+                }
               />
             )}
             {(connectTrace || result) && busy === null && (
@@ -466,15 +488,6 @@ export function GatewayClient() {
                   {result && <TraceList steps={fullTrace} />}
                 </div>
               </details>
-            )}
-            {result?.decision === "allowed" && result.columns && result.rows && (
-              <div className="space-y-2">
-                <ResultTable columns={result.columns} rows={result.rows} />
-                <details className="text-xs text-muted-foreground">
-                  <summary className="cursor-pointer">SQL that actually ran</summary>
-                  <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono">{result.sql_executed}</pre>
-                </details>
-              </div>
             )}
           </div>
         </div>

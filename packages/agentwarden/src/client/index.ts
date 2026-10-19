@@ -18,7 +18,8 @@ export type ConnectResult =
   | ({ ok: true; trace: TraceStep[]; solved_in_seconds: number } & ConnectResponse)
   | { ok: false; reason: string; trace: TraceStep[] };
 
-export type AskResult = QueryResponse & { agent_trace: TraceStep[] };
+/** `answer`: the agent's own plain-English reply built from the rows (when its model can do that). */
+export type AskResult = QueryResponse & { agent_trace: TraceStep[]; answer?: string };
 
 /**
  * The agent's side. connect() solves the identity puzzle with the agent's own model and gets an
@@ -133,6 +134,11 @@ export class AgentWardenClient {
       }
     }
     const r = await this.call("/query", { body: { question, sql }, auth: true });
-    return { ...(r.body as QueryResponse), agent_trace: agentTrace };
+    const res = r.body as QueryResponse;
+    let answer: string | undefined;
+    if (res.decision === "allowed" && res.rows && this.opts.model.answer) {
+      answer = await this.opts.model.answer(question, res.columns ?? [], res.rows).catch(() => undefined);
+    }
+    return { ...res, agent_trace: agentTrace, answer };
   }
 }

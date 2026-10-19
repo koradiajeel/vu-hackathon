@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { CheckCircle, CircleNotch, Fingerprint, LockKey, Prohibit, ShieldCheck, Warning } from "@phosphor-icons/react"
+import { useEffect, useState, type ReactNode } from "react"
+import { CheckCircle, CircleNotch, Fingerprint, LockKey, Prohibit, ShieldCheck, Table, Warning } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 
 type StepStatus = "ok" | "info" | "warn" | "blocked" | "error"
@@ -50,9 +50,12 @@ export function PhaseTracker({
   result,
   question,
   runId,
+  resultSlot,
 }: {
   busy: boolean
   question: string
+  /** The data and the agent's answer, shown once all three phases have passed. */
+  resultSlot?: ReactNode
   connectTrace: TraceStep[] | null
   /** Puzzle from an earlier connect, shown when this question reused a valid access ID. */
   earlierPuzzle: TraceStep[] | null
@@ -287,6 +290,22 @@ export function PhaseTracker({
             </div>
           )}
         </PhaseCard>
+      )}
+
+      {/* ── Result: only after phase 3 has passed ── */}
+      {resultSlot && states[2] === "passed" && (
+        <section className="animate-in fade-in slide-in-from-bottom-2 rounded-2xl border-2 border-ok bg-ok/5 p-4 duration-500">
+          <div className="mb-3 flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ok/15">
+              <Table className="h-5 w-5 text-ok" weight="duotone" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-ok">Result</div>
+              <div className="font-heading font-semibold">&ldquo;{question}&rdquo;</div>
+            </div>
+          </div>
+          {resultSlot}
+        </section>
       )}
     </div>
   )
