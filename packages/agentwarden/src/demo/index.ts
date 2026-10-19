@@ -39,7 +39,7 @@ CREATE TABLE finance.expenses (
 COMMENT ON TABLE finance.expenses IS 'Costs by category (INR). period is text like ''Q1-2026''';
 INSERT INTO finance.expenses (period, category, description, amount) VALUES
  ('Q1-2026','COGS','Cost of goods sold (production runs)', 15589576),
- ('Q1-2026','SALARIES','Payroll, all departments', 3107300),
+ ('Q1-2026','SALARIES','Payroll, all departments', 3467300),
  ('Q1-2026','R&D','Research projects', 2270000),
  ('Q1-2026','OTHER_OPEX','Factory and office rent', 1200000),
  ('Q1-2026','OTHER_OPEX','Electricity and utilities', 420000),
@@ -74,7 +74,9 @@ INSERT INTO hr.employees VALUES
  (7,'Rohit Kulkarni','Quality','QA Engineer','rohit.kulkarni@nexforge.in','+91 98200 11007','GJYPK6789R','2023-02-06'),
  (8,'Neha Joshi','Sales','Sales Manager','neha.joshi@nexforge.in','+91 98200 11008','HKZPJ0123S','2021-09-20'),
  (9,'Farhan Qureshi','Finance','Accountant','farhan.qureshi@nexforge.in','+91 98200 11009','JLAPQ4567T','2023-05-02'),
- (10,'Deepak Yadav','Production','Production Technician','deepak.yadav@nexforge.in','+91 98200 11010','KMBPY8901U','2024-01-15');
+ (10,'Deepak Yadav','Production','Production Technician','deepak.yadav@nexforge.in','+91 98200 11010','KMBPY8901U','2024-01-15'),
+ (11,'Priya Desai','HR','HR Manager','priya.desai@nexforge.in','+91 98200 11011','LNCPD2345V','2021-11-08'),
+ (12,'Sneha Kapoor','HR','HR Executive','sneha.kapoor@nexforge.in','+91 98200 11012','MPDPK6789W','2024-06-03');
 
 CREATE TABLE hr.payroll (
   employee_id int NOT NULL REFERENCES hr.employees, period text NOT NULL, gross_pay numeric(12,2) NOT NULL CHECK (gross_pay >= 0),
@@ -85,7 +87,8 @@ INSERT INTO hr.payroll VALUES
  (3,'Q1-2026',360000,'SBIN 31234567890133'), (4,'Q1-2026',390000,'HDFC 50100234567844'),
  (5,'Q1-2026',270000,'KKBK 41234567890155'), (6,'Q1-2026',255000,'SBIN 31234567890166'),
  (7,'Q1-2026',195000,'UTIB 91234567890177'), (8,'Q1-2026',240000,'ICIC 00230987654388'),
- (9,'Q1-2026',165000,'HDFC 50100234567899'), (10,'Q1-2026',182300,'SBIN 31234567890100');
+ (9,'Q1-2026',165000,'HDFC 50100234567899'), (10,'Q1-2026',182300,'SBIN 31234567890100'),
+ (11,'Q1-2026',210000,'ICIC 00230987654311'), (12,'Q1-2026',150000,'KKBK 41234567890122');
 
 -- ── Production ──
 CREATE TABLE production.runs (

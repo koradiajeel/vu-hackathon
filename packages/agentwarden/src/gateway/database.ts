@@ -92,14 +92,35 @@ export async function readCatalog(db: Database): Promise<CatalogTable[]> {
     if (!map.has(row.t)) map.set(row.t, { table: row.t, columns: [], description: row.descr ?? undefined });
     map.get(row.t)!.columns.push(row.col);
   }
-  return [...map.values()];
+  const tables = [...map.values()];
+  // Category columns: text columns whose values repeat and number 12 or fewer (never unique ones like names or IDs).
+  const text = await db.query(
+    `SELECT table_schema || '.' || table_name AS t, column_name AS col FROM information_schema.columns
+      WHERE table_schema <> ALL($1) AND data_type IN ('text', 'character varying', 'character')`,
+    [SYSTEM_SCHEMAS]
+  );
+  for (const { t, col } of text.rows as { t: string; col: string }[]) {
+    const table = map.get(t);
+    if (!table) continue;
+    const stats = await db.query(`SELECT count(DISTINCT ${q(col)})::int AS d, count(*)::int AS n FROM ${qualified(t)}`);
+    const { d, n } = stats.rows[0] as { d: number; n: number };
+    if (d === 0 || d > 12 || d >= n) continue;
+    const vals = await db.query(`SELECT DISTINCT ${q(col)}::text AS v FROM ${qualified(t)} WHERE ${q(col)} IS NOT NULL ORDER BY 1`);
+    const list = (vals.rows as { v: string }[]).map((r) => r.v);
+    if (list.every((v) => v.length <= 40)) (table.values ??= {})[col] = list;
+  }
+  return tables;
 }
 
 /** The part of the catalog an agent is allowed to see (denied columns removed). */
 export function catalogFor(agent: AgentConfig, catalog: CatalogTable[]): CatalogTable[] {
   return catalog
     .filter((t) => tableDecision(agent.policy, t.table, agent.department).allowed)
-    .map((t) => ({ ...t, columns: t.columns.filter((c) => !columnDenied(agent.policy, t.table, c)) }))
+    .map((t) => {
+      const columns = t.columns.filter((c) => !columnDenied(agent.policy, t.table, c));
+      const values = t.values && Object.fromEntries(Object.entries(t.values).filter(([c]) => columns.includes(c)));
+      return { ...t, columns, values: values && Object.keys(values).length ? values : undefined };
+    })
     .filter((t) => t.columns.length > 0);
 }
 

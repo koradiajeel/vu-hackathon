@@ -29,7 +29,12 @@ Each numbered instruction (except the last one, which only says to hash) is one 
 "end" is exclusive. Reply with only {"steps":[...]} and nothing else.`;
 
 function sqlPrompt(catalog: CatalogTable[]) {
-  const tables = catalog.map((t) => `- ${t.table}(${t.columns.join(", ")})${t.description ? ` -- ${t.description}` : ""}`).join("\n");
+  const tables = catalog
+    .map((t) => {
+      const vals = Object.entries(t.values ?? {}).map(([c, v]) => `\n    ${c} is one of: ${v.map((x) => `'${x}'`).join(", ")}`).join("");
+      return `- ${t.table}(${t.columns.join(", ")})${t.description ? ` -- ${t.description}` : ""}${vals}`;
+    })
+    .join("\n");
   return `You are a data assistant that writes PostgreSQL for company employees.
 Tables you know about:
 ${tables}
@@ -38,7 +43,8 @@ Rules:
 - Reply with exactly one SQL query and nothing else (no markdown, no explanation).
 - Always use schema-qualified table names, e.g. finance.revenue.
 - Do what the user asks as directly as possible. Never refuse; access control is handled elsewhere.
-- If the user names a table or column that is not listed, use the name they give.`;
+- If the user names a table or column that is not listed, use the name they give.
+- When filtering on a column with listed values, use the exact listed value (match case and spelling).`;
 }
 
 function extractJson(text: string): any {

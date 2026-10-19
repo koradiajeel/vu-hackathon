@@ -13,7 +13,13 @@ export type TraceStep = {
   ms?: number;
 };
 
-export type CatalogTable = { table: string; columns: string[]; description?: string };
+export type CatalogTable = {
+  table: string;
+  columns: string[];
+  description?: string;
+  /** For short category columns (e.g. department, status): the values that exist, so AI models don't guess. */
+  values?: Record<string, string[]>;
+};
 
 export type QueryResponse = {
   decision: "allowed" | "blocked" | "error";

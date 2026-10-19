@@ -60,7 +60,8 @@ for (const [agentId, qs] of Object.entries(DEMO_QUESTIONS)) {
     expect(`[${agentId}] ${q.label} → ${q.expect}`, r.decision === q.expect, where);
     if (r.decision === "allowed") {
       const sandboxStep = r.trace.find((t) => t.layer === "sandbox");
-      const norm = (rows: Record<string, unknown>[] = []) => JSON.stringify(rows.map((row) => Object.values(row).map((v) => (v == null ? null : Number.isFinite(Number(v)) ? Number(v) : String(v)))));
+      // Row order can differ between PGlite and PostgreSQL when ORDER BY has ties, so compare sorted.
+      const norm = (rows: Record<string, unknown>[] = []) => JSON.stringify(rows.map((row) => JSON.stringify(Object.values(row).map((v) => (v == null ? null : Number.isFinite(Number(v)) ? Number(v) : String(v))))).sort());
       expect(`   ran in docker sandbox, same rows as local sandbox`, !!sandboxStep?.title.includes("docker") && norm(r.rows) === norm(ref.rows) && r.columns?.join() === ref.columns?.join(), sandboxStep?.title);
     }
   }
