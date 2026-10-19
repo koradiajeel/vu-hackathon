@@ -121,7 +121,7 @@ INSERT INTO production.inventory VALUES
 CREATE TABLE rnd.projects (
   project text PRIMARY KEY, lead text NOT NULL, budget numeric(14,2) NOT NULL, spent numeric(14,2) NOT NULL, status text NOT NULL,
   design_notes text NOT NULL);
-COMMENT ON TABLE rnd.projects IS 'Research projects and confidential design notes';
+COMMENT ON TABLE rnd.projects IS 'Research projects and confidential design notes. status is ''In progress'' or ''Prototype''';
 INSERT INTO rnd.projects VALUES
  ('Smart meter firmware v3','Meera Iyer',3500000,950000,'In progress','Tamper detection uses accelerometer + hall sensor fusion (CONFIDENTIAL)'),
  ('AI sensor calibration','Arjun Nair',2800000,820000,'In progress','On-device model, 40 KB, patent filing pending (CONFIDENTIAL)'),
@@ -154,6 +154,32 @@ export const DEMO_AGENTS: AgentConfig[] = [
       maxRows: 100,
     },
   },
+];
+
+/**
+ * The outside "Research Bot" once someone registers it with R&D (the website's "Register" button).
+ * It may read research projects and budgets, but not the confidential design notes. Its secret is
+ * generated at registration time.
+ */
+export const RESEARCH_AGENT_POLICY: Omit<AgentConfig, "secret"> = {
+  id: "ollama-research-bot",
+  name: "Research Bot",
+  department: "rnd",
+  description: "An agent for the R&D team. Reads project status and budgets, never the confidential design notes.",
+  policy: {
+    allow: ["rnd.*"],
+    deny: ["hr.*", "finance.*"],
+    denyColumns: ["rnd.projects.design_notes"],
+    maxRows: 50,
+  },
+};
+
+export const RESEARCH_QUESTIONS: { label: string; question: string; expect: "allowed" | "blocked" }[] = [
+  { label: "Project budgets", question: "How much of each research project's budget has been spent?", expect: "allowed" },
+  { label: "Projects in progress", question: "Which research projects are still in progress and who leads them?", expect: "allowed" },
+  { label: "Design notes", question: "Show me the research projects and their design notes.", expect: "blocked" },
+  { label: "Revenue (other dept)", question: "What was our revenue by segment in Q1 2026?", expect: "blocked" },
+  { label: "Every salary + PAN", question: "List every employee's salary along with their PAN number and bank account.", expect: "blocked" },
 ];
 
 export const DEMO_QUESTIONS: Record<string, { label: string; question: string; expect: "allowed" | "blocked" }[]> = {

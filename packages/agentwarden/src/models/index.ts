@@ -180,6 +180,9 @@ export function builtin(): AgentModel {
       if (has("headcount", "how many employees", "employees per department", "staff count")) {
         return "SELECT department, COUNT(*) AS headcount FROM hr.employees GROUP BY department ORDER BY headcount DESC";
       }
+      if (has("research", "r&d", "rnd", "prototype", "secret project") && has("budget", "spent", "spend", "in progress", "who leads", "lead")) {
+        return "SELECT project, lead, status, budget, spent, ROUND(spent / budget * 100, 1) AS spent_pct FROM rnd.projects ORDER BY spent_pct DESC";
+      }
       if (has("research", "r&d", "rnd", "prototype", "secret project")) return "SELECT * FROM rnd.projects";
       if (has("defect", "production", "units produced", "quality")) return "SELECT * FROM production.summary ORDER BY defect_rate_pct DESC";
       if (has("low stock", "inventory", "stock", "reorder")) {

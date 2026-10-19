@@ -195,7 +195,7 @@ export function GatewayClient() {
   const [state, setState] = useState<DemoState | null>(null)
   const [agentId, setAgentId] = useState("finance-analyst")
   const [question, setQuestion] = useState("")
-  const [busy, setBusy] = useState<"connect" | "ask" | "reset" | null>(null)
+  const [busy, setBusy] = useState<"connect" | "ask" | "reset" | "register" | null>(null)
   const [connectTrace, setConnectTrace] = useState<TraceStep[] | null>(null)
   const [result, setResult] = useState<QueryResult | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -261,6 +261,21 @@ export function GatewayClient() {
       setResult(r.result)
       setRunId((n) => n + 1)
       await refresh()
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  async function register() {
+    setBusy("register")
+    setError(null)
+    try {
+      setState(await api<DemoState>("/register", { agent: agentId }))
+      setResult(null)
+      setConnectTrace(null)
+      setQuestion("")
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -432,8 +447,8 @@ export function GatewayClient() {
           </Card>
 
           <div ref={resultsRef} className="scroll-mt-24 space-y-3">
-            {((busy !== null && busy !== "reset") || connectTrace || result) && <h2 className="font-heading text-xl font-semibold">3. Watch the three phases</h2>}
-            {((busy !== null && busy !== "reset") || connectTrace || result) && (
+            {((busy === "connect" || busy === "ask") || connectTrace || result) && <h2 className="font-heading text-xl font-semibold">3. Watch the three phases</h2>}
+            {((busy === "connect" || busy === "ask") || connectTrace || result) && (
               <PhaseTracker
                 busy={busy === "connect" || busy === "ask"}
                 connectTrace={connectTrace}
@@ -468,8 +483,19 @@ export function GatewayClient() {
           <Card>
             <CardContent className="space-y-3 p-5">
               <h3 className="font-heading font-semibold">What {agent?.name ?? "this agent"} may read</h3>
-              {!agent?.registered && (
-                <p className="text-sm text-muted-foreground">Nothing. It is not registered, so it never gets an access ID.</p>
+              {agent && !agent.registered && (
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">Nothing. It is not registered, so it never gets a puzzle or an access ID. Try asking it something first.</p>
+                  <div className="rounded-lg border border-dashed border-l1/50 bg-l1/5 p-3">
+                    <p className="text-sm">
+                      Now imagine the R&amp;D team vouches for it. Registering gives it a secret, its own database role, and a policy: read{" "}
+                      <code className="text-xs">rnd.*</code>, but never the confidential <code className="text-xs">design_notes</code>.
+                    </p>
+                    <Button className="mt-2" size="sm" onClick={register} disabled={busy !== null}>
+                      <Key weight="fill" /> {busy === "register" ? "Registering…" : "Register with R&D department"}
+                    </Button>
+                  </div>
+                </div>
               )}
               <ul className="space-y-1.5">
                 {agent?.tables.map((t) => (

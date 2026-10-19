@@ -34,7 +34,7 @@ export type AuditEntry = {
   ts: string;
   agent_id: string;
   department?: string;
-  event: "puzzle" | "connect" | "query";
+  event: "puzzle" | "connect" | "query" | "register";
   decision: "allowed" | "blocked" | "error";
   stopped_at?: string;
   reason: string;
@@ -51,6 +51,8 @@ export type Gateway = {
   audit(): AuditEntry[];
   catalog(): CatalogTable[];
   agents(): AgentConfig[];
+  /** Registers a new agent with a department while running: gives it a database role and lets it ask for puzzles. */
+  registerAgent(agent: AgentConfig): Promise<void>;
   sandbox(): Sandbox;
 };
 
@@ -58,7 +60,8 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 
 export function createGateway(opts: GatewayOptions): Gateway {
   const db = opts.database;
-  const agents = new Map(opts.agents.map((a) => [a.id, a]));
+  const agentList = [...opts.agents];
+  const agents = new Map(agentList.map((a) => [a.id, a]));
   const identity = new IdentityService(agents, {
     jwtSecret: opts.jwtSecret ?? crypto.randomUUID() + crypto.randomUUID(),
     challengeTtlSeconds: opts.challengeTtlSeconds ?? 30,
@@ -83,16 +86,28 @@ export function createGateway(opts: GatewayOptions): Gateway {
         id uuid PRIMARY KEY, ts timestamptz NOT NULL, agent_id text NOT NULL, department text, event text NOT NULL,
         decision text NOT NULL, stopped_at text, reason text NOT NULL, question text, sql text, risk_score numeric, rows int)`);
     catalog = await readCatalog(db);
-    await syncDatabaseRoles(db, opts.agents, catalog);
-    if (sandbox.kind === "docker") {
-      for (const a of opts.agents) {
-        const role = roleFor(a.id);
-        const pw = crypto.randomUUID().replace(/-/g, "");
-        rolePasswords.set(role, pw);
-        await db.exec(`ALTER ROLE "${role}" LOGIN PASSWORD '${pw}'`);
-      }
-    }
+    await syncDatabaseRoles(db, agentList, catalog);
+    for (const a of agentList) await setLoginPassword(a);
   })();
+
+  /** The Docker sandbox logs in as each agent's role, so those roles need a password. */
+  async function setLoginPassword(a: AgentConfig) {
+    if (sandbox.kind !== "docker") return;
+    const role = roleFor(a.id);
+    const pw = crypto.randomUUID().replace(/-/g, "");
+    rolePasswords.set(role, pw);
+    await db.exec(`ALTER ROLE "${role}" LOGIN PASSWORD '${pw}'`);
+  }
+
+  async function registerAgent(agent: AgentConfig) {
+    await ready;
+    if (agents.has(agent.id)) throw new Error(`Agent "${agent.id}" is already registered.`);
+    await syncDatabaseRoles(db, [agent], catalog);
+    await setLoginPassword(agent);
+    await identity.addAgent(agent);
+    agentList.push(agent);
+    await record({ agent_id: agent.id, department: agent.department, event: "register", decision: "allowed", reason: `Registered with the ${agent.department} department` });
+  }
 
   async function record(entry: Omit<AuditEntry, "id" | "ts">) {
     const full: AuditEntry = { id: crypto.randomUUID(), ts: new Date().toISOString(), ...entry };
@@ -240,7 +255,8 @@ export function createGateway(opts: GatewayOptions): Gateway {
     ready,
     audit: () => auditLog,
     catalog: () => catalog,
-    agents: () => opts.agents,
+    agents: () => agentList,
+    registerAgent,
     sandbox: () => sandbox,
   };
 }

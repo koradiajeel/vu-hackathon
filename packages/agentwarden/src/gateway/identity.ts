@@ -46,6 +46,12 @@ export class IdentityService {
     for (const a of this.agents.values()) this.secretHashes.set(a.id, await sha256OfString(`${a.id}:${a.secret}`));
   }
 
+  /** Registers one more agent while the gateway is running. */
+  async addAgent(agent: AgentConfig) {
+    this.secretHashes.set(agent.id, await sha256OfString(`${agent.id}:${agent.secret}`));
+    this.agents.set(agent.id, agent);
+  }
+
   issueChallenge(agentId: string): Challenge {
     const agent = this.agents.get(agentId);
     if (!agent) throw new IdentityError(401, "agent_not_registered", `Agent "${agentId}" is not registered with any department, so it cannot get a puzzle.`);

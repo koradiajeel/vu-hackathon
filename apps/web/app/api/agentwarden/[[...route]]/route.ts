@@ -1,6 +1,6 @@
 import { AgentWardenClient, builtin, gemini, groq, ollama, openrouter, type AgentModel } from "../../../../../../packages/agentwarden/src/index";
-import { createDemoGateway, DEMO_AGENTS, DEMO_QUESTIONS } from "../../../../../../packages/agentwarden/src/demo";
-import { tableDecision, columnDenied, type Gateway } from "../../../../../../packages/agentwarden/src/gateway";
+import { createDemoGateway, DEMO_AGENTS, DEMO_QUESTIONS, RESEARCH_AGENT_POLICY, RESEARCH_QUESTIONS } from "../../../../../../packages/agentwarden/src/demo";
+import { tableDecision, columnDenied, type AgentConfig, type Gateway } from "../../../../../../packages/agentwarden/src/gateway";
 
 // Department data gateway demo.
 //   /api/agentwarden/gateway/*  the real gateway (any agent can call it over HTTP)
@@ -19,7 +19,7 @@ function departmentModel(): AgentModel {
   return builtin();
 }
 
-type DemoState = { gateway: Gateway; clients: Map<string, AgentWardenClient>; lastConnect: Map<string, unknown> };
+type DemoState = { gateway: Gateway; clients: Map<string, AgentWardenClient>; lastConnect: Map<string, unknown>; researchRegistered: boolean };
 
 async function createState(): Promise<DemoState> {
   const gateway = await createDemoGateway({ basePath: GATEWAY_BASE, jwtSecret: process.env.CAPAGENT_JWT_SECRET });
@@ -32,7 +32,7 @@ async function createState(): Promise<DemoState> {
     UNREGISTERED.id,
     new AgentWardenClient({ gatewayUrl: `http://internal${GATEWAY_BASE}`, agentId: UNREGISTERED.id, model: ollama({ model: process.env.OLLAMA_MODEL || "llama3.2" }), fetch: fetchIn })
   );
-  return { gateway, clients, lastConnect: new Map() };
+  return { gateway, clients, lastConnect: new Map(), researchRegistered: false };
 }
 
 function getState(reset = false): Promise<DemoState> {
@@ -48,7 +48,7 @@ async function demoState() {
   const catalog = s.gateway.catalog();
   const model = departmentModel();
   const agents = [
-    ...DEMO_AGENTS.map((a) => {
+    ...[...DEMO_AGENTS, ...s.gateway.agents().filter((a) => !DEMO_AGENTS.some((d) => d.id === a.id))].map((a: AgentConfig) => {
       const c = s.clients.get(a.id)!;
       return {
         id: a.id,
@@ -67,7 +67,7 @@ async function demoState() {
         })),
       };
     }),
-    {
+    ...(s.researchRegistered ? [] : [{
       id: UNREGISTERED.id,
       name: UNREGISTERED.name,
       department: UNREGISTERED.department,
@@ -78,14 +78,14 @@ async function demoState() {
       connect: s.lastConnect.get(UNREGISTERED.id) ?? null,
       policy: null,
       tables: catalog.map((t) => ({ table: t.table, allowed: false, hidden_columns: [] as string[] })),
-    },
+    }]),
   ];
   return {
     agents,
     database: catalog.map((t) => ({ table: t.table, columns: t.columns, description: t.description ?? "" })),
     sandbox: { kind: s.gateway.sandbox().kind, limits: s.gateway.sandbox().limits() },
     audit: s.gateway.audit().slice(0, 12),
-    questions: { ...DEMO_QUESTIONS, [UNREGISTERED.id]: DEMO_QUESTIONS["finance-analyst"]!.filter((q) => q.expect === "allowed").concat(DEMO_QUESTIONS["finance-analyst"]!.filter((q) => q.expect === "blocked").slice(0, 1)) },
+    questions: { ...DEMO_QUESTIONS, [UNREGISTERED.id]: s.researchRegistered ? RESEARCH_QUESTIONS : DEMO_QUESTIONS["finance-analyst"]!.filter((q) => q.expect === "allowed").concat(DEMO_QUESTIONS["finance-analyst"]!.filter((q) => q.expect === "blocked").slice(0, 1)) },
     model_note: model.provider === "builtin" ? "No AI key set (GEMINI_API_KEY or GROQ_API_KEY): registered agents use the built-in demo model, which only understands the example questions." : null,
   };
 }
@@ -106,6 +106,19 @@ async function handler(req: Request) {
   const body = (await req.json().catch(() => null)) as null | { agent?: string; question?: string };
   const client = s.clients.get(String(body?.agent ?? ""));
   if (!client) return json({ error: "unknown_agent" }, 404);
+
+  // Someone in R&D registers the outside Research Bot: from now on it gets puzzles and reads only R&D data.
+  if (path === "/api/agentwarden/demo/register" && req.method === "POST") {
+    if (body!.agent !== UNREGISTERED.id) return json({ error: "Only the Research Bot can be registered in this demo." }, 400);
+    if (!s.researchRegistered) {
+      const secret = crypto.randomUUID();
+      await s.gateway.registerAgent({ ...RESEARCH_AGENT_POLICY, secret });
+      s.clients.set(UNREGISTERED.id, new AgentWardenClient({ gatewayUrl: `http://internal${GATEWAY_BASE}`, agentId: UNREGISTERED.id, agentSecret: secret, model: departmentModel(), fetch: (r) => s.gateway.fetch(r) }));
+      s.lastConnect.delete(UNREGISTERED.id);
+      s.researchRegistered = true;
+    }
+    return json(await demoState());
+  }
 
   if (path === "/api/agentwarden/demo/connect" && req.method === "POST") {
     const r = await client.connect();
