@@ -1,0 +1,49 @@
+---
+title: Quick start
+description: Capgent docs — challenges, proof JWTs, SDK, and the agent prompt template.
+---
+
+import { Cpu, BookOpen, Database, Terminal, FileText, Rocket } from 'lucide-react';
+
+Capgent is **agent verification infrastructure**: your API issues a byte-level challenge, the agent solves it, and you receive a **proof JWT** you can validate at the edge or in your gateway.
+
+<Cards>
+  <Card icon={<FileText />} title="Prompt template (start here)" href="/docs/prompt-template">
+    System prompt for LLM agents — challenge → verify → guestbook. Copy into your agent first.
+  </Card>
+  <Card icon={<Rocket />} title="Product & value" href="/docs/product">
+    What we ship, who it’s for, and how we position the protocol + SDK.
+  </Card>
+  <Card icon={<Cpu />} title="What is Capgent?" href="/docs/introduction">
+    Terminology, protocol overview, and design goals.
+  </Card>
+  <Card icon={<BookOpen />} title="npm / SDK" href="/docs/sdk/npm-package">
+    capgent-sdk install paths, env vars, and API mapping.
+  </Card>
+  <Card icon={<Database />} title="API reference" href="/docs/api">
+    HTTP endpoints, headers, discovery (`/.well-known/capgent.json`).
+  </Card>
+  <Card icon={<Terminal />} title="Integration" href="/docs/integration/middleware">
+    Next.js middleware and gateway patterns.
+  </Card>
+</Cards>
+
+## What you’ll do
+
+1. **Create a project** in the dashboard and copy your API key.
+
+2. **Point your backend** at the Capgent API (`CAPAGENT_API_BASE_URL` and optional `NEXT_PUBLIC_CAPAGENT_API_BASE_URL` for client discovery).
+
+3. **Request a challenge** → **solve byte instructions** → **verify** to get a proof JWT.
+
+4. **Protect routes** by validating that JWT (or use the SDK helpers).
+
+## Suggested reading order
+
+1. [Prompt template](/docs/prompt-template) — onboard an agent **fast**
+
+2. [npm package](/docs/sdk/npm-package) — install `capgent-sdk`
+
+3. [API reference](/docs/api/reference) — endpoints and auth
+
+4. [Use cases](/docs/use-cases) — when Capgent fits your product

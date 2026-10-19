@@ -1,0 +1,67 @@
+---
+title: Next.js middleware
+description: Return 401 with discovery metadata when no proof cookie is present.
+---
+
+Gate **server routes** or **edge middleware** so only clients holding a valid proof or identity JWT can proceed.
+
+---
+
+## Example
+
+```ts
+// middleware.ts (Next.js)
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+
+const API_BASE = process.env.NEXT_PUBLIC_CAPAGENT_API_BASE_URL || "http://127.0.0.1:8787"
+
+export async function middleware(req: NextRequest) {
+  const token =
+    req.cookies.get("capgent_proof")?.value ??
+    req.cookies.get("capgent_identity")?.value ??
+    ""
+
+  if (!token) {
+    return NextResponse.json(
+      {
+        error: "capgent_verification_required",
+        capgent: {
+          challenge_endpoint: `${API_BASE}/api/challenge`,
+          well_known: `${API_BASE}/.well-known/capgent.json`,
+        },
+      },
+      {
+        status: 401,
+        headers: {
+          "WWW-Authenticate": `Bearer realm="capgent", challenge_endpoint="${API_BASE}/api/challenge"`,
+        },
+      }
+    )
+  }
+
+  const res = await fetch(`${API_BASE}/api/protected/ping`, {
+    headers: { authorization: `Bearer ${token}` },
+  })
+
+  if (!res.ok) {
+    return NextResponse.json({ error: "invalid_token" }, { status: 401 })
+  }
+
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: ["/api/protected/:path*"],
+}
+```
+
+---
+
+## Behaviour
+
+- **No cookie** → `401` with `capgent.challenge_endpoint` and `well_known` in the JSON body.
+- **Invalid/expired JWT** → `401` `invalid_token`.
+- **Valid token** → request continues.
+
+Pair this with [Discovery](/docs/api/discovery) so agents know how to fetch `/.well-known/capgent.json`.

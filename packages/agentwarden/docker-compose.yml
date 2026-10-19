@@ -1,0 +1,21 @@
+# PostgreSQL 16 for the Docker sandbox demo/test:  docker compose up -d --wait
+# The gateway connects as admin on localhost:55432. Sandbox containers join the
+# "agentwarden-db" network and reach the database as host "postgres" — nothing else.
+name: agentwarden
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: aw_admin
+      POSTGRES_PASSWORD: aw_admin_demo_pw
+      POSTGRES_DB: company
+    ports:
+      - "127.0.0.1:55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aw_admin -d company"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+networks:
+  default:
+    name: agentwarden-db

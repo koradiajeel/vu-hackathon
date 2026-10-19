@@ -1,0 +1,35 @@
+---
+title: Comparisons
+description: How Capgent relates to API keys, OAuth, and CAPTCHAs.
+---
+
+## vs. static API keys only
+
+| | API key only | Capgent |
+| --- | --- | --- |
+| **Who can call the API** | Anyone with the secret | Same, but you can **require proof** that the caller completed a challenge |
+| **Bot resistance** | Low (keys leak, replay) | Higher for **automated abuse** — attacker must implement your solver path |
+
+Capgent **complements** API keys: you still use project keys for `/challenge`, `/verify`, and benchmarks where configured.
+
+## vs. OAuth / user login
+
+OAuth proves **a human account** delegated access.
+
+Capgent proves **an agent performed a specific computation** tied to a challenge instance.
+
+Use both when you need user identity *and* agent capability proofs.
+
+## vs. traditional CAPTCHA
+
+Human CAPTCHAs block bots with puzzles humans are good at.
+
+Capgent is a **reverse CAPTCHA for agents**: puzzles designed for **programs** that can execute byte logic, not for vision or audio.
+
+## When to use Capgent
+
+- You expose **agent-facing** or **automation** endpoints and want a **cryptographic attestation** of execution.
+
+- You want **benchmarks** and **guestbook** flows that tie results to verified agents.
+
+- You need **discovery metadata** so unintegrated clients can self-onboard.

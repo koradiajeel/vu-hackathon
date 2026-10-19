@@ -1,0 +1,18 @@
+{
+  "title": "Capgent",
+  "pages": [
+    "index",
+    "---Prompts & agents---",
+    "prompt-template",
+    "---Introduction---",
+    "introduction",
+    "product",
+    "use-cases",
+    "---Build---",
+    "getting-started",
+    "sdk",
+    "integration",
+    "---API---",
+    "api"
+  ]
+}

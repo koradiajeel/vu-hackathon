@@ -1,0 +1,50 @@
+---
+title: Installation
+description: Install capgent-sdk and configure your environment.
+---
+
+## Requirements
+
+- **Node 18+**, **Bun**, **Deno**, or **Cloudflare Workers**
+- A **Capgent project** and API key from the web app (`/projects`)
+
+## Install the SDK
+
+```bash
+npm install capgent-sdk
+```
+
+```bash
+bun add capgent-sdk
+```
+
+## Environment variables
+
+Set these in your **server-side** environment (never expose the API key to the browser):
+
+| Variable | Purpose |
+| --- | --- |
+| `CAPAGENT_API_BASE_URL` | Origin of the Capgent Worker/API (e.g. `https://….workers.dev`) |
+| `CAPAGENT_API_KEY` | Project API key from the dashboard |
+| `NEXT_PUBLIC_CAPAGENT_API_BASE_URL` | (Next.js) Public API origin for client-side discovery URLs in middleware examples |
+
+The SDK sends `X-Capgent-Api-Key` automatically when an `apiKey` is configured on the client.
+
+## Verify connectivity
+
+From your backend:
+
+```bash
+curl -sS -H "X-Capgent-Api-Key: $CAPAGENT_API_KEY" \
+  "$CAPAGENT_API_BASE_URL/api/challenge" \
+  -H "Content-Type: application/json" \
+  -d '{"agent_name":"smoke-test","agent_version":"1.0.0"}'
+```
+
+You should receive JSON with `challenge_id`, `nonce`, and `instructions`.
+
+---
+
+## Next
+
+- [Project & API keys](/docs/getting-started/project-keys) — dashboard workflow and key hygiene

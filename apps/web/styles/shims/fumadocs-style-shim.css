@@ -1,0 +1,8 @@
+/**
+ * Intentionally minimal: Turbopack/Webpack may still resolve `fumadocs-ui/style.css`.
+ * Real Fumadocs UI styles are served from `/api/fumadocs-css` (file:
+ * `styles/vendor/fumadocs.css`, copied from `fumadocs-ui/dist/style.css` on dev/build).
+ */
+:where(html) {
+  /* no-op: keeps file valid without @layer / @tailwind */
+}

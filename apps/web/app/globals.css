@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Bright theme: vivid violet primary, one colour per Capgent Shield layer. */
+  :root {
+    --background: 240 100% 99%;
+    --foreground: 243 47% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 243 47% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 243 47% 14%;
+    --primary: 252 95% 62%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 190 95% 94%;
+    --secondary-foreground: 198 90% 24%;
+    --muted: 245 70% 96.5%;
+    --muted-foreground: 243 14% 42%;
+    --accent: 328 100% 96%;
+    --accent-foreground: 330 80% 38%;
+    --destructive: 350 89% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 245 45% 90%;
+    --input: 245 45% 87%;
+    --ring: 252 95% 62%;
+    --radius: 0.75rem;
+    --chart-1: 252 95% 62%;
+    --chart-2: 190 95% 42%;
+    --chart-3: 322 90% 56%;
+    --chart-4: 32 100% 52%;
+    --chart-5: 152 76% 40%;
+    /* Layers: 1 identity, 2 shield, 3 IAM — and decision colours */
+    --l1: 221 95% 55%;
+    --l2: 322 88% 54%;
+    --l3: 28 100% 52%;
+    --ok: 152 76% 38%;
+    --warn: 38 100% 48%;
+    --bad: 350 89% 56%;
+  }
+
+  .dark {
+    --background: 245 45% 8%;
+    --foreground: 240 40% 98%;
+    --card: 245 40% 11%;
+    --card-foreground: 240 40% 98%;
+    --popover: 245 40% 11%;
+    --popover-foreground: 240 40% 98%;
+    --primary: 252 100% 72%;
+    --primary-foreground: 245 45% 8%;
+    --secondary: 198 60% 18%;
+    --secondary-foreground: 190 95% 85%;
+    --muted: 245 30% 17%;
+    --muted-foreground: 243 20% 70%;
+    --accent: 322 45% 20%;
+    --accent-foreground: 322 95% 85%;
+    --destructive: 350 85% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 245 30% 20%;
+    --input: 245 30% 22%;
+    --ring: 252 100% 72%;
+    --chart-1: 252 100% 72%;
+    --chart-2: 190 95% 55%;
+    --chart-3: 322 95% 66%;
+    --chart-4: 32 100% 60%;
+    --chart-5: 152 70% 50%;
+    --l1: 217 100% 66%;
+    --l2: 322 95% 66%;
+    --l3: 30 100% 60%;
+    --ok: 152 70% 50%;
+    --warn: 42 100% 58%;
+    --bad: 350 90% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    transition: background-color 250ms ease, color 250ms ease, border-color 250ms ease;
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Grid dot background */
+.dot-grid {
+  background-image: radial-gradient(circle, hsl(var(--primary) / 0.25) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Animated gradient border */
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.gradient-border {
+  --angle: 0deg;
+  border-image: conic-gradient(from var(--angle), #10b981, #3b82f6, #8b5cf6, #10b981) 1;
+  animation: spin-border 4s linear infinite;
+}
+
+@keyframes spin-border {
+  to { --angle: 360deg; }
+}
+
+/* Glow pulse */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* Marquee */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* Beam animation for the hero */
+@keyframes beam {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+.animate-beam {
+  animation: beam 6s ease-in-out infinite;
+}
+
+/* Subtle float */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+/* ── Docs sidebar: full collapse ──────────────────────────────── */
+
+/*
+ * Fumadocs uses --fd-sidebar-width (268px on md+) for the grid column.
+ * When collapsed we override it to 0 on the layout, then visually
+ * hide the sidebar content while keeping the toggle button accessible.
+ */
+
+/* 1. Zero out the grid column for the sidebar when collapsed */
+#nd-docs-layout:has(#nd-sidebar[data-collapsed="true"]) {
+  --fd-sidebar-width: 0px !important;
+}
+
+/* 2. The sidebar aside itself — keep it in flow but zero-width */
+#nd-sidebar[data-collapsed="true"] {
+  width: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  border-width: 0 !important;
+  padding: 0 !important;
+}
+
+/* 3. Hide the "Open Search" button in Fumadocs' floating collapsed trigger
+      so that only the sidebar toggle button is visible */
+#nd-docs-layout:has(#nd-sidebar[data-collapsed="true"])
+  .fixed button[aria-label="Open Search"] {
+  display: none !important;
+}
+

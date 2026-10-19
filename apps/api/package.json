@@ -1,0 +1,22 @@
+{
+  "name": "@capgent/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "capgent-sdk": "*",
+    "@neondatabase/serverless": "^1.0.2",
+    "@upstash/redis": "^1.35.3",
+    "drizzle-orm": "^0.44.4",
+    "hono": "^4.9.1",
+    "jose": "^6.1.0",
+    "@electric-sql/pglite": "^0.3.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.4",
+    "typescript": "^5.8.2",
+    "@types/node": "^25.5.0"
+  }
+}

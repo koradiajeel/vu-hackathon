@@ -1,0 +1,46 @@
+---
+title: Discovery
+description: WWW-Authenticate, 401 bodies, and /.well-known/capgent.json
+---
+
+## Why discovery exists
+
+Unintegrated agents need a **machine-readable** way to learn:
+
+- Where to request a **challenge**
+- Where to **verify** and obtain a proof JWT
+- Which **protocol version** you speak
+
+---
+
+## WWW-Authenticate
+
+Protected responses may include:
+
+```http
+WWW-Authenticate: Bearer realm="capgent", challenge_endpoint="https://api.example.com/api/challenge"
+```
+
+Clients that understand Bearer challenges can use `challenge_endpoint` to start the flow.
+
+---
+
+## Structured 401 body
+
+When middleware returns `401`, include Capgent discovery fields in JSON:
+
+```json
+{
+  "error": "capgent_verification_required",
+  "capgent": {
+    "challenge_endpoint": "https://api.example.com/api/challenge",
+    "well_known": "https://api.example.com/.well-known/capgent.json"
+  }
+}
+```
+
+---
+
+## Well-known URL
+
+`GET /.well-known/capgent.json` returns deployment-specific URLs, docs links, and version metadata so agents can bootstrap without hardcoding your Worker hostname.

@@ -1,0 +1,103 @@
+/**
+ * Consistent vertical rhythm for Fumadocs MDX (#nd-page .prose).
+ * Reduces cramped paragraphs and clarifies section breaks.
+ */
+
+#nd-page .prose {
+  line-height: 1.65;
+}
+
+#nd-page .prose > :first-child {
+  margin-top: 0 !important;
+}
+
+#nd-page .prose > p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+#nd-page .prose > p:last-child {
+  margin-bottom: 0;
+}
+
+#nd-page .prose > h2 {
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.35rem;
+  scroll-margin-top: 6rem;
+}
+
+#nd-page .prose > h2:first-of-type {
+  margin-top: 0.5rem;
+}
+
+#nd-page .prose > h3 {
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  scroll-margin-top: 5.5rem;
+}
+
+#nd-page .prose > h4 {
+  margin-top: 1.25rem;
+  margin-bottom: 0.4rem;
+  scroll-margin-top: 5rem;
+}
+
+#nd-page .prose > ul,
+#nd-page .prose > ol {
+  margin-top: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+#nd-page .prose li {
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+#nd-page .prose li > p {
+  margin-bottom: 0.5rem;
+}
+
+#nd-page .prose > hr {
+  margin: 2.25rem 0;
+  border: 0;
+  height: 1px;
+  background: color-mix(in oklch, currentColor 14%, transparent);
+}
+
+#nd-page .prose > pre,
+#nd-page .prose pre {
+  margin-top: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+#nd-page .prose > table {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+#nd-page .prose > blockquote {
+  margin-top: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Fumadocs Cards grid */
+#nd-page .prose > div[class*="grid"] {
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Fumadocs Callout (flex + accent rail); avoid matching card grids */
+#nd-page .prose > div.flex.gap-2.rounded-xl.border:not([class*="grid"]) {
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+#nd-page .prose blockquote p + p {
+  margin-top: 0.65rem;
+}
+
+/* Extra air after multi-line callout bodies */
+#nd-page .prose > div.flex.gap-2.rounded-xl.border p + p {
+  margin-top: 0.65rem;
+}

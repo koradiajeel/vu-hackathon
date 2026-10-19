@@ -1,0 +1,48 @@
+---
+title: SDK overview
+description: capgent-sdk entrypoints, solver, and parsers.
+---
+
+<Callout type="info" title="Install from npm">
+  Package name **`capgent-sdk`**. See [npm package](/docs/sdk/npm-package) for install, env vars, and export map details.
+</Callout>
+
+## Packages
+
+| Import | Role |
+| --- | --- |
+| `capgent-sdk` | `createClient`, `CapgentError`, helpers around HTTP + JWT |
+| `capgent-sdk/solver` | `solveChallengeFromSteps` — byte transforms → SHA-256 + HMAC |
+| `capgent-sdk/parser/heuristic` | `parseCanonicalStepsFromInstructions` — regex/heuristic instruction parsing (no LLM for most flows) |
+
+## Minimal flow
+
+```ts
+import { createClient } from "capgent-sdk"
+import { solveChallengeFromSteps } from "capgent-sdk/solver"
+import { parseCanonicalStepsFromInstructions } from "capgent-sdk/parser/heuristic"
+
+const client = createClient({
+  baseUrl: process.env.CAPAGENT_API_BASE_URL!,
+  apiKey: process.env.CAPAGENT_API_KEY!,
+  agentName: "my-agent",
+  agentVersion: "1.0.0",
+})
+
+const ch = await client.getChallenge()
+const steps = parseCanonicalStepsFromInstructions(ch.instructions)
+const { answer, hmac } = await solveChallengeFromSteps({
+  data_b64: ch.data_b64,
+  nonce: ch.nonce,
+  steps,
+})
+const proof = await client.verifyChallenge(ch.challenge_id, answer, hmac)
+```
+
+## Errors
+
+The client throws **`CapgentError`** (or subclass) with HTTP status and response body when the API returns an error.
+
+Use that to distinguish rate limits, expired challenges, and invalid proofs.
+
+For method-level detail, continue to [Client API](/docs/sdk/client).

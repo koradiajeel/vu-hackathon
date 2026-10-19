@@ -1,0 +1,16 @@
+/**
+ * Smoother Clerk-style TOC: highlight rail + thumb dot track scroll position.
+ * Fumadocs sets --fd-top / --fd-height on the thumb container; clip-path follows.
+ */
+
+#nd-toc .absolute.top-0.inset-s-0 > svg {
+  transition:
+    clip-path 220ms cubic-bezier(0.33, 1, 0.68, 1),
+    opacity 180ms ease;
+}
+
+#nd-toc .absolute.top-0.inset-s-0 .size-1.rounded-full {
+  transition:
+    translate 220ms cubic-bezier(0.33, 1, 0.68, 1),
+    scale 180ms ease;
+}

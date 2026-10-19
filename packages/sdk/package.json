@@ -1,0 +1,55 @@
+{
+  "name": "capgent-sdk",
+  "version": "2.0.0",
+  "description": "TypeScript SDK for Capgent — agent verification, reverse CAPTCHA challenges, and API identity.",
+  "private": false,
+  "type": "module",
+  "keywords": [
+    "capgent",
+    "ai-agents",
+    "agent-verification",
+    "reverse-captcha",
+    "captcha",
+    "typescript",
+    "sdk",
+    "api-security",
+    "jwt",
+    "identity",
+    "proof-token",
+    "openrouter",
+    "llm",
+    "hmac",
+    "challenge-response"
+  ],
+  "files": [
+    "dist/**/*"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./solver": {
+      "types": "./dist/solver.d.ts",
+      "default": "./dist/solver.js"
+    },
+    "./parser/heuristic": {
+      "types": "./dist/parser/heuristic.d.ts",
+      "default": "./dist/parser/heuristic.js"
+    },
+    "./parser/llm-openrouter": {
+      "types": "./dist/parser/llmOpenRouter.d.ts",
+      "default": "./dist/parser/llmOpenRouter.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "node -e \"console.log('no-op')\""
+  },
+  "dependencies": {}
+}
+

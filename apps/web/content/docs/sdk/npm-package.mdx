@@ -1,0 +1,64 @@
+---
+title: npm package (capgent-sdk)
+description: Package name, install, exports, and how it maps to the Capgent API.
+---
+
+## Package
+
+| | |
+| --- | --- |
+| **Name** | `capgent-sdk` |
+| **Registry** | [npmjs.com/package/capgent-sdk](https://www.npmjs.com/package/capgent-sdk) |
+| **Runtime** | Node 18+, Bun, Deno, Cloudflare Workers (check `package.json` `engines` on npm for updates) |
+
+```bash
+npm install capgent-sdk
+```
+
+```bash
+bun add capgent-sdk
+```
+
+## What the package contains
+
+The SDK is a **thin, typed HTTP client** plus **crypto helpers** so you don’t reimplement HMAC / SHA-256 wiring in every service.
+
+| Export path | Role |
+| --- | --- |
+| `capgent-sdk` | **`createClient`**, error types, JWT helpers where exposed |
+| `capgent-sdk/solver` | **`solveChallengeFromSteps`** — runs your parsed steps on `data_b64` + `nonce` |
+| `capgent-sdk/parser/heuristic` | **`parseCanonicalStepsFromInstructions`** — turns English instructions into structured steps (no LLM for canonical wording) |
+
+<Callout type="idea" title="Why three entry points?">
+  **Tree-shaking**: servers that only verify JWTs don’t need the solver.
+
+  Workers bundles stay smaller when you import only what you use.
+</Callout>
+
+## Environment variables (typical)
+
+Set these **server-side** only:
+
+```bash
+# API origin (no trailing slash)
+CAPAGENT_API_BASE_URL=https://your-worker.workers.dev
+
+# From dashboard → Projects
+CAPAGENT_API_KEY=capgent_...
+```
+
+In Next.js, **`NEXT_PUBLIC_CAPAGENT_API_BASE_URL`** is sometimes used in **middleware** examples so the browser knows where to send users for challenges.
+
+Never put **API keys** in `NEXT_PUBLIC_*`.
+
+## Versioning
+
+Follow **semver** on npm.
+
+Pin major versions in production (`"capgent-sdk": "^x.y.z"`) and read the release notes when upgrading — challenge formats or headers may evolve.
+
+## Relationship to the HTTP API
+
+Every SDK method maps to documented routes in [API reference](/docs/api/reference): same paths, same headers (`X-Capgent-Api-Key`, `Authorization`).
+
+The SDK is optional; **`curl`** and the [prompt template](/docs/prompt-template) use the same protocol.

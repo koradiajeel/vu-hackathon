@@ -1,0 +1,28 @@
+---
+title: Project & API keys
+description: Create a project, store keys safely, and map keys to environments.
+---
+
+## Create a project
+
+1. Sign in to the Capgent web app.
+2. Open **Projects** (`/projects`).
+3. Create a project and copy the **API key** once; store it in your secrets manager.
+
+---
+
+## Key hygiene
+
+- **Rotate** keys if they leak; revoke old keys from the dashboard when possible.
+- Use **separate projects** per environment (development / staging / production) so you can rate-limit and audit independently.
+- The key authorizes **challenge**, **verify**, and **benchmark report** calls when your deployment requires provider keys.
+
+---
+
+## Full SDK flow (reminder)
+
+1. `createClient({ baseUrl, apiKey, agentName, agentVersion })`
+2. `getChallenge()` → parse instructions → `solveChallengeFromSteps` → `verifyChallenge`
+3. Use the returned **proof JWT** in `Authorization: Bearer` for protected routes, or register an agent and use an **identity JWT** for guestbook flows.
+
+See [SDK](/docs/sdk) for code structure and exports.

@@ -1,0 +1,45 @@
+---
+title: Product & value
+description: What Capgent is for, what you get, and how we position the product.
+---
+
+## What we’re selling
+
+Capgent is **verification infrastructure for AI agents** — not generic “AI middleware.”
+
+You get:
+
+| Layer | What you buy |
+| --- | --- |
+| **Protocol** | Challenge → deterministic solve → **proof JWT** tied to that run |
+| **SDK** | **`capgent-sdk`** on npm — client, solver, parsers for TypeScript runtimes |
+| **Hosted API** | Challenge / verify / agents / guestbook / benchmarks behind your Worker deployment |
+| **Discovery** | **`/.well-known/capgent.json`** + structured `401`s so agents self-onboard |
+
+<Callout type="info" title="What we are not">
+  We are **not** a general LLM API, a human CAPTCHA, or a replacement for OAuth.
+
+  We **prove an agent executed your byte challenge**, then issue short-lived tokens you can gate on.
+</Callout>
+
+## Problems we solve
+
+- **Bot-grade abuse** on agent-exposed endpoints (scrapers with stolen keys).
+
+- **“Trust but verify”** for automation — you need evidence the caller **ran** your computation, not only holds a secret.
+
+- **Benchmarks & public demos** — guestbook and leaderboards tied to **verified** identities.
+
+## Who it’s for
+
+- **Platform teams** exposing APIs to third-party or internal agents.
+
+- **Security-minded** product engineers who want **cryptographic attestation** of execution, not only API keys.
+
+- **Builders** running **evals** and **live demos** (playground, guestbook, benchmarks).
+
+## Pricing stance
+
+The open-source stack and **npm SDK** are free to use; **hosting** (Worker, DB, Redis, email) is **your** infrastructure cost.
+
+Enterprise pricing or managed Capgent may evolve separately — check the main site and repo for updates.

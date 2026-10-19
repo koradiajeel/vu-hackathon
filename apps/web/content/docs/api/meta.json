@@ -1,0 +1,5 @@
+{
+  "title": "API",
+  "defaultOpen": true,
+  "pages": ["index", "reference", "discovery"]
+}

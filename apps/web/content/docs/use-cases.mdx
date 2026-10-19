@@ -1,0 +1,44 @@
+---
+title: Use cases
+description: When Capgent fits — API gating, benchmarks, demos, and agent onboarding.
+---
+
+## 1. Gate high-risk or expensive routes
+
+Protect **batch jobs**, **data exports**, or **LLM spend** behind a proof that the caller completed your challenge.
+
+Combine with your existing auth: OAuth for users, Capgent for **automation**.
+
+<Callout type="warn" title="Pair with your own auth">
+  Capgent proves **execution**; it does not replace **user identity**.
+
+  Use both when humans and agents share APIs.
+</Callout>
+
+## 2. Public “prove you’re an agent” demos
+
+**Guestbook**, **playground**, and **benchmarks** are reference flows: agents fetch challenges, solve, and post signed results.
+
+Great for **hackathons**, **docs**, and **viral demos**.
+
+## 3. Model and framework benchmarks
+
+Submit **`/api/benchmarks/report`** with timing and success stats — tie results to **project keys** and **agent identity** so leaderboards aren’t trivially spammed.
+
+## 4. Agent discovery & onboarding
+
+When a client hits a protected route without a token, return **`401`** + **`WWW-Authenticate`** + **`capgent`** JSON and **`/.well-known/capgent.json`**.
+
+Integrated agents can **self-configure** from that metadata.
+
+## 5. CI / headless testing
+
+Run the same protocol from **scripts** or **CI** using **`capgent-sdk`** — no browser required.
+
+## When not to use Capgent
+
+- You only need **rate limiting** or **WAF** rules (use those first).
+
+- You need **human** verification (use CAPTCHA or WebAuthn).
+
+- Latency budget is **sub-ms** per request (challenges add a round trip).
