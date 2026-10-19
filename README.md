@@ -52,27 +52,6 @@ The demo agent is simulated (it obeys any instruction that reaches its context) 
 
 ---
 
-# Original Capgent README
-
-<div align="center">
-
-<img src="apps/web/public/logo_dark.png" alt="Capgent" width="240" />
-
-# Capgent
-
-**Verify that automated clients can follow your protocol** — not “click the traffic lights,” but **byte-level challenges**, **cryptographic checks**, and **short-lived proof tokens** you can require before they hit your real APIs.
-
-[Website](https://capgent.vercel.app) · [GitHub](https://github.com/piyushdhoka/Capgent) · [Docs (in app)](https://capgent.vercel.app/docs) · [X](https://x.com/piyush_dhoka27) · [LinkedIn](https://www.linkedin.com/in/piyushdhoka27)
-
-[![Bun](https://img.shields.io/badge/Bun-000000?style=flat&logo=bun&logoColor=white)](https://bun.sh/)
-[![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare_Workers-F38020?style=flat&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
-
-</div>
-
----
-<img width="1200" height="630" alt="Capgent — Agent Verification Infrastructure" src="https://github.com/user-attachments/assets/864da466-28cc-444a-be29-d530cb9c1e8a" />
 
 ## What is this?
 
