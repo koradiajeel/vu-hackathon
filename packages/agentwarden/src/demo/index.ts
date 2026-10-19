@@ -15,7 +15,7 @@ CREATE SCHEMA rnd;      COMMENT ON SCHEMA rnd IS 'Research and development (conf
 CREATE TABLE finance.revenue (
   revenue_id serial PRIMARY KEY, period text NOT NULL, segment text NOT NULL CHECK (segment IN ('B2G','B2B','B2C')),
   customer text NOT NULL, contract text NOT NULL, amount numeric(14,2) NOT NULL CHECK (amount > 0), recognised_on date NOT NULL);
-COMMENT ON TABLE finance.revenue IS 'Revenue recognised per contract (INR)';
+COMMENT ON TABLE finance.revenue IS 'Revenue recognised per contract (INR). period is text like ''Q4-2025'' or ''Q1-2026''';
 INSERT INTO finance.revenue (period, segment, customer, contract, amount, recognised_on) VALUES
  ('Q4-2025','B2G','Pune Smart City Development Corp','Smart meter roll-out, phase 1', 9800000,'2025-12-20'),
  ('Q4-2025','B2B','Tata Projects Ltd','Metro depot meters and sensors', 6100000,'2025-11-30'),
@@ -36,7 +36,7 @@ CREATE TABLE finance.expenses (
   expense_id serial PRIMARY KEY, period text NOT NULL,
   category text NOT NULL CHECK (category IN ('COGS','SALARIES','R&D','OTHER_OPEX','DEPRECIATION','INTEREST')),
   description text NOT NULL, amount numeric(14,2) NOT NULL CHECK (amount >= 0));
-COMMENT ON TABLE finance.expenses IS 'Costs by category (INR)';
+COMMENT ON TABLE finance.expenses IS 'Costs by category (INR). period is text like ''Q1-2026''';
 INSERT INTO finance.expenses (period, category, description, amount) VALUES
  ('Q1-2026','COGS','Cost of goods sold (production runs)', 15589576),
  ('Q1-2026','SALARIES','Payroll, all departments', 3107300),
@@ -51,7 +51,7 @@ INSERT INTO finance.expenses (period, category, description, amount) VALUES
 CREATE TABLE finance.balance_sheet (
   period text NOT NULL, account text NOT NULL, account_type text NOT NULL CHECK (account_type IN ('ASSET','LIABILITY','EQUITY')),
   amount numeric(16,2) NOT NULL, PRIMARY KEY (period, account));
-COMMENT ON TABLE finance.balance_sheet IS 'Closing balances at period end (INR)';
+COMMENT ON TABLE finance.balance_sheet IS 'Closing balances at period end (INR). period is text like ''Q1-2026''';
 INSERT INTO finance.balance_sheet VALUES
  ('Q1-2026','Cash and bank','ASSET',18500000), ('Q1-2026','Accounts receivable','ASSET',9200000),
  ('Q1-2026','Inventory','ASSET',5438000), ('Q1-2026','Property, plant and equipment','ASSET',42000000),
@@ -79,7 +79,7 @@ INSERT INTO hr.employees VALUES
 CREATE TABLE hr.payroll (
   employee_id int NOT NULL REFERENCES hr.employees, period text NOT NULL, gross_pay numeric(12,2) NOT NULL CHECK (gross_pay >= 0),
   bank_account text NOT NULL, PRIMARY KEY (employee_id, period));
-COMMENT ON TABLE hr.payroll IS 'Quarterly pay per employee with salary bank account';
+COMMENT ON TABLE hr.payroll IS 'Quarterly pay per employee (gross_pay) with salary bank account. period is text like ''Q1-2026''';
 INSERT INTO hr.payroll VALUES
  (1,'Q1-2026',600000,'HDFC 50100234567811'), (2,'Q1-2026',450000,'ICIC 00230987654322'),
  (3,'Q1-2026',360000,'SBIN 31234567890133'), (4,'Q1-2026',390000,'HDFC 50100234567844'),

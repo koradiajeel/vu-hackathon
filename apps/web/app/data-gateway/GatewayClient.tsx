@@ -317,7 +317,7 @@ export function GatewayClient() {
         <div className="flex items-start gap-2 rounded-lg border border-warn/40 bg-warn/10 p-3 text-sm">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-warn" weight="fill" />
           <span>
-            {state.model_note} Add <code>GEMINI_API_KEY</code> to <code>apps/web/.env.local</code> and restart to use Gemini for any question.
+            {state.model_note} Add <code>GEMINI_API_KEY</code> or <code>GROQ_API_KEY</code> to <code>apps/web/.env.local</code> and restart to use a real AI model for any question.
           </span>
         </div>
       )}

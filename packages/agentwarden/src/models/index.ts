@@ -137,6 +137,23 @@ export function openrouter(opts: { apiKey: string; model: string }): AgentModel 
   });
 }
 
+/** Any model on Groq (https://console.groq.com/keys), e.g. "openai/gpt-oss-120b". */
+export function groq(opts: { apiKey: string; model?: string }): AgentModel {
+  const model = opts.model ?? "openai/gpt-oss-120b";
+  return chatModel("groq", `Groq (${model})`, async (system, user, json) => {
+    const j = await postJson("https://api.groq.com/openai/v1/chat/completions", {
+      model,
+      temperature: 0,
+      ...(json ? { response_format: { type: "json_object" } } : {}),
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+    }, { authorization: `Bearer ${opts.apiKey}` });
+    return j.choices?.[0]?.message?.content ?? "";
+  });
+}
+
 /**
  * Offline stand-in so the demo runs without any API key.
  * It reads the puzzle with fixed rules and knows SQL for the demo questions only.

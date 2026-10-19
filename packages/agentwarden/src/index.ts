@@ -6,6 +6,6 @@
  *   import { gemini, ollama } from "agentwarden/models";       // the agent's AI model
  */
 export { AgentWardenClient, type ClientOptions, type ConnectResult, type AskResult } from "./client";
-export { gemini, ollama, openrouter, builtin, type AgentModel } from "./models";
+export { gemini, groq, ollama, openrouter, builtin, type AgentModel } from "./models";
 export type { TraceStep, QueryResponse, ConnectResponse, CatalogTable, Layer, StepStatus } from "./shared/types";
 export type { PuzzleStep, Challenge } from "./shared/challenge";

@@ -1,4 +1,4 @@
-import { AgentWardenClient, builtin, gemini, ollama, openrouter, type AgentModel } from "../../../../../../packages/agentwarden/src/index";
+import { AgentWardenClient, builtin, gemini, groq, ollama, openrouter, type AgentModel } from "../../../../../../packages/agentwarden/src/index";
 import { createDemoGateway, DEMO_AGENTS, DEMO_QUESTIONS } from "../../../../../../packages/agentwarden/src/demo";
 import { tableDecision, columnDenied, type Gateway } from "../../../../../../packages/agentwarden/src/gateway";
 
@@ -11,9 +11,10 @@ export const dynamic = "force-dynamic";
 const GATEWAY_BASE = "/api/agentwarden/gateway";
 const UNREGISTERED = { id: "ollama-research-bot", name: "Research Bot", department: "unknown" };
 
-/** The model behind the registered agents: Gemini when a key is set, otherwise the offline stand-in. */
+/** The model behind the registered agents: Gemini, Groq or OpenRouter when a key is set, otherwise the offline stand-in. */
 function departmentModel(): AgentModel {
   if (process.env.GEMINI_API_KEY) return gemini({ apiKey: process.env.GEMINI_API_KEY, model: process.env.GEMINI_MODEL || "gemini-2.5-flash" });
+  if (process.env.GROQ_API_KEY) return groq({ apiKey: process.env.GROQ_API_KEY, model: process.env.GROQ_MODEL || undefined });
   if (process.env.OPENROUTER_API_KEY) return openrouter({ apiKey: process.env.OPENROUTER_API_KEY, model: process.env.OPENROUTER_MODEL || "google/gemini-2.5-flash" });
   return builtin();
 }
@@ -85,7 +86,7 @@ async function demoState() {
     sandbox: { kind: s.gateway.sandbox().kind, limits: s.gateway.sandbox().limits() },
     audit: s.gateway.audit().slice(0, 12),
     questions: { ...DEMO_QUESTIONS, [UNREGISTERED.id]: DEMO_QUESTIONS["finance-analyst"]!.filter((q) => q.expect === "allowed").concat(DEMO_QUESTIONS["finance-analyst"]!.filter((q) => q.expect === "blocked").slice(0, 1)) },
-    model_note: model.provider === "builtin" ? "No GEMINI_API_KEY set: registered agents use the built-in demo model, which only understands the example questions." : null,
+    model_note: model.provider === "builtin" ? "No AI key set (GEMINI_API_KEY or GROQ_API_KEY): registered agents use the built-in demo model, which only understands the example questions." : null,
   };
 }
 
