@@ -1,4 +1,4 @@
-import { solveWithSteps, type Challenge } from "../shared/challenge";
+import { base64ToBytes, bytesToHex, solveWithSteps, type Challenge } from "../shared/challenge";
 import type { CatalogTable, ConnectResponse, QueryResponse, TraceStep } from "../shared/types";
 import type { AgentModel } from "../models";
 
@@ -63,7 +63,12 @@ export class AgentWardenClient {
       status: "info",
       title: `Puzzle received (${challenge.time_limit_seconds}s limit)`,
       detail: "256 random bytes plus instructions in randomly varied wording",
-      data: { instructions: challenge.instructions },
+      data: {
+        instructions: challenge.instructions,
+        time_limit_seconds: challenge.time_limit_seconds,
+        bytes_hex: bytesToHex(base64ToBytes(challenge.data_b64)),
+        nonce: challenge.nonce,
+      },
     });
 
     const started = performance.now();
@@ -77,7 +82,7 @@ export class AgentWardenClient {
         title: `${model.label} read the puzzle`,
         detail: `Turned the wording into ${steps.length} byte steps, ran them, hashed the result (SHA-256) and stamped it with the nonce (HMAC)`,
         ms: Math.round(performance.now() - started),
-        data: { steps },
+        data: { steps, answer: solution.answer, hmac: solution.hmac },
       });
     } catch (e) {
       trace.push({ layer: "agent", status: "blocked", title: `${model.label} could not solve the puzzle`, detail: (e as Error).message, ms: Math.round(performance.now() - started) });

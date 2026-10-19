@@ -15,12 +15,12 @@ import {
   Robot,
   ShieldCheck,
   Warning,
-  XCircle,
 } from "@phosphor-icons/react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { PhaseTracker } from "./PhaseTracker"
 
 type StepStatus = "ok" | "info" | "warn" | "blocked" | "error"
 type Layer = "identity" | "request" | "sql" | "policy" | "sandbox" | "agent"
@@ -195,10 +195,12 @@ export function GatewayClient() {
   const [state, setState] = useState<DemoState | null>(null)
   const [agentId, setAgentId] = useState("finance-analyst")
   const [question, setQuestion] = useState("")
-  const [busy, setBusy] = useState<"connect" | "ask" | null>(null)
+  const [busy, setBusy] = useState<"connect" | "ask" | "reset" | null>(null)
   const [connectTrace, setConnectTrace] = useState<TraceStep[] | null>(null)
   const [result, setResult] = useState<QueryResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [runId, setRunId] = useState(0)
+  const [asked, setAsked] = useState("")
   const resultsRef = useRef<HTMLDivElement | null>(null)
 
   async function refresh() {
@@ -228,9 +230,12 @@ export function GatewayClient() {
     setBusy("connect")
     setError(null)
     setResult(null)
+    setConnectTrace(null)
+    requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }))
     try {
       const r = await api<ConnectResult>("/connect", { agent: agentId })
       setConnectTrace(r.trace)
+      setRunId((n) => n + 1)
       await refresh()
     } catch (e) {
       setError((e as Error).message)
@@ -247,12 +252,15 @@ export function GatewayClient() {
     setBusy("ask")
     setError(null)
     setResult(null)
+    setConnectTrace(null)
+    setAsked(question)
+    requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }))
     try {
       const r = await api<{ connect: ConnectResult | null; result: QueryResult }>("/ask", { agent: agentId, question })
       setConnectTrace(r.connect ? r.connect.trace : null)
       setResult(r.result)
+      setRunId((n) => n + 1)
       await refresh()
-      requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }))
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -261,7 +269,7 @@ export function GatewayClient() {
   }
 
   async function reset() {
-    setBusy("connect")
+    setBusy("reset")
     try {
       setState(await api<DemoState>("/reset", {}))
       setResult(null)
@@ -424,28 +432,26 @@ export function GatewayClient() {
           </Card>
 
           <div ref={resultsRef} className="scroll-mt-24 space-y-3">
-            {(connectTrace || result) && <h2 className="font-heading text-xl font-semibold">3. What happened</h2>}
-            {result && (
-              <Card className={cn("border-2", result.decision === "allowed" ? "border-ok bg-ok/5" : "border-bad bg-bad/5")}>
-                <CardContent className="flex items-start gap-3 p-4">
-                  {result.decision === "allowed" ? (
-                    <ShieldCheck className="h-7 w-7 shrink-0 text-ok" weight="fill" />
-                  ) : (
-                    <XCircle className="h-7 w-7 shrink-0 text-bad" weight="fill" />
-                  )}
-                  <div className="min-w-0">
-                    <div className={cn("font-heading text-lg font-bold", result.decision === "allowed" ? "text-ok" : "text-bad")}>
-                      {result.decision === "allowed"
-                        ? `Allowed: ${result.row_count} row(s) returned`
-                        : `Stopped at ${result.stopped_at ? LAYER[result.stopped_at].label : "the gateway"}`}
-                    </div>
-                    <p className="break-words text-sm text-muted-foreground">{result.reason}</p>
-                  </div>
-                </CardContent>
-              </Card>
+            {((busy !== null && busy !== "reset") || connectTrace || result) && <h2 className="font-heading text-xl font-semibold">3. Watch the three phases</h2>}
+            {((busy !== null && busy !== "reset") || connectTrace || result) && (
+              <PhaseTracker
+                busy={busy === "connect" || busy === "ask"}
+                connectTrace={connectTrace}
+                earlierPuzzle={!connectTrace && result ? (agent?.connect?.trace ?? null) : null}
+                result={result}
+                question={asked}
+                runId={runId}
+              />
             )}
-            {connectTrace && <TraceList steps={connectTrace} />}
-            {result && <TraceList steps={fullTrace} />}
+            {(connectTrace || result) && busy === null && (
+              <details className="rounded-xl border bg-card p-3 text-sm">
+                <summary className="cursor-pointer font-medium">Full technical trace</summary>
+                <div className="mt-3">
+                  {connectTrace && <TraceList steps={connectTrace} />}
+                  {result && <TraceList steps={fullTrace} />}
+                </div>
+              </details>
+            )}
             {result?.decision === "allowed" && result.columns && result.rows && (
               <div className="space-y-2">
                 <ResultTable columns={result.columns} rows={result.rows} />
